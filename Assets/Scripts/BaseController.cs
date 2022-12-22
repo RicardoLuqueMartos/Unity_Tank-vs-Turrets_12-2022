@@ -82,6 +82,9 @@ public class BaseController : MonoBehaviour
 
     [SerializeField]
     float AimingIconMoveSpeed = 3f;
+
+    [SerializeField]
+    float AimingIconOffset = 0.5f;
     #endregion Variables
 
     private void OnEnable()
@@ -197,8 +200,6 @@ public class BaseController : MonoBehaviour
         {
             // Draw a line in the Editor window from the canon on the trajectory of the future bullet
             Debug.DrawRay(bulletSpawner.transform.position, bulletSpawner.transform.up * 20f);
-
-         //   HandleAimIcon(hit.point);
         }
     }
     void TraceTrajectoryForAimingIcon(GameObject bulletSpawner)
@@ -215,32 +216,29 @@ public class BaseController : MonoBehaviour
         {
             // move the aiming icon to default position
             ResetAimIcon();
-
-        /*    AimIcon.transform.position = BaseAimIconPosition.transform.position;
-            AimIcon.transform.LookAt(Camera.main.transform);
-        */
         }
     }
     void HandleAimIcon(RaycastHit aimed) 
     {
-        #region Draw Aiming Icon for player on target    
+        #region Draw Aiming Icon for player on target 
         
-    //    AimIcon.transform.position = aimed.point;
+        // show the icon
+        AimIcon.SetActive(true);
+        // Smoothly move the aiming Icon To the hit.point position
         AimIcon.transform.position = Vector3.Lerp(AimIcon.transform.position, aimed.point, Time.deltaTime * AimingIconMoveSpeed);
+        // rotate the icon to face the camera
         AimIcon.transform.LookAt(Camera.main.transform);
-   
+
         #endregion Draw Aiming Icon for player on target
     }
 
     void ResetAimIcon()
     {
-        #region Draw Aiming Icon for player on target    
+    //    AimIcon.transform.position = Vector3.Lerp(AimIcon.transform.position, BaseAimIconPosition.transform.position, Time.deltaTime * AimingIconMoveSpeed);
+    //    AimIcon.transform.LookAt(Camera.main.transform);
 
-    //    AimIcon.transform.position = BaseAimIconPosition.transform.position;
-        AimIcon.transform.position = Vector3.Lerp(AimIcon.transform.position, BaseAimIconPosition.transform.position, Time.deltaTime * AimingIconMoveSpeed);
-        AimIcon.transform.LookAt(Camera.main.transform);
-
-        #endregion Draw Aiming Icon for player on target
+        // hide the icon
+        AimIcon.SetActive(false);
     }
 
     protected void InstantiateBulletPrefab(GameObject bulletSpawner) // create the bullet
