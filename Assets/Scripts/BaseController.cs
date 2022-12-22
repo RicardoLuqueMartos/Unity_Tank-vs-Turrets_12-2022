@@ -283,6 +283,7 @@ public class BaseController : MonoBehaviour
             // Receive damages from the bullet
             ReceiveDamages(collision.transform.GetComponent<BulletController>().GetDamages());
         } 
+        // verify is it is an ammo box
         else if (collision.transform.GetComponent<AmmoBoxManager>())
         {
             if (Ammo < MaxAmmo)
@@ -291,6 +292,8 @@ public class BaseController : MonoBehaviour
                 AddAmmos(collision.transform.GetComponent<AmmoBoxManager>().GetAmmos());
                 Destroy(collision.gameObject);
 
+                if (IsPlayer)
+                    uiManager.SetAmmosDisplay(Ammo);
             }
         }
     }
