@@ -52,11 +52,11 @@ public class TankController : BaseController
     void HandleTankVelocity()
     {
         // get the input and move the tank forward and backward depending of the max velocity
-        if (Input.GetAxis("Vertical") > 0)
+        if (Input.GetAxis("Vertical") > 0 || Input.GetKey(KeyCode.Z))
         {
             transform.Translate(Vector3.forward * (Time.deltaTime * MaxVelocity));
         }
-        else if (Input.GetAxis("Vertical") < 0)
+        else if (Input.GetAxis("Vertical") < 0 || Input.GetKey(KeyCode.S))
         {
             transform.Translate(Vector3.back * (Time.deltaTime * MaxVelocity));
         }
@@ -69,6 +69,7 @@ public class TankController : BaseController
             // rotate Horizontally the body of the tank by getting the input value and multiplying it by the rotation speed
             transform.Rotate(0.0f, Input.GetAxis("Horizontal")*RotationSpeed, 0.0f, Space.World);
         }
+
     }
 
     public GameObject GetTurretObj()

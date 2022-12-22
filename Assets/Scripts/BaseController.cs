@@ -87,6 +87,7 @@ public class BaseController : MonoBehaviour
     float AimingIconOffset = 0.5f;
     #endregion Variables
 
+    #region Inits
     private void OnEnable()
     {
         tankController = FindObjectOfType<TankController>();
@@ -101,13 +102,28 @@ public class BaseController : MonoBehaviour
         GameStarted = true;
     }
 
+    #endregion Inits
+
+    #region About Enemy Turrets
     void DetectTurretsAmount()
     {
         List<TurretController> turretsList = new List<TurretController>();
         turretsList = FindObjectsOfType<TurretController>().ToList();
         TurretAmount = turretsList.Count;
     }
+    
+    void VerifyDestroyedTurretsAmount() // verify if all ennemy turrets are destroyed
+    {
+        // verify if all turrets are destroyed
+        if (tankController.DestroyedTurrets == TurretAmount)
+        {
+            // open win menu if all ennemies are destroyed
+            uiManager.OpenWinMenu();
+        }
+    }
+    #endregion About Enemy Turrets
 
+    #region Updates
     private void Update()
     {
         if (!GameStarted)
@@ -128,6 +144,9 @@ public class BaseController : MonoBehaviour
             TraceTrajectoryForAimingIcon(BulletSpawner);
         }
     }
+    #endregion Updates
+
+    #region Firing
     protected void Fire()
     {
         // if the canon is not locked by fire rate and has some remaining ammo / infinite ammo
@@ -202,6 +221,22 @@ public class BaseController : MonoBehaviour
             Debug.DrawRay(bulletSpawner.transform.position, bulletSpawner.transform.up * 20f);
         }
     }
+
+    protected void InstantiateBulletPrefab(GameObject bulletSpawner) // create the bullet
+    {
+        // Create a bullet and place it on the correct trajectory
+        Instantiate<GameObject>(BulletPrefab, bulletSpawner.transform.position, bulletSpawner.transform.rotation);
+
+        // remove one ammo from inventory
+        Ammo = Ammo - 1;
+
+        // display ammo count on the UI
+        if (IsPlayer)
+            uiManager.SetAmmosDisplay(Ammo);
+    }
+    #endregion Firing
+
+    #region Aiming Icon
     void TraceTrajectoryForAimingIcon(GameObject bulletSpawner)
     {
         // Use a raycast to detect if the target is aimed and no obstacle on the way, return the aimed object
@@ -234,26 +269,12 @@ public class BaseController : MonoBehaviour
 
     void ResetAimIcon()
     {
-    //    AimIcon.transform.position = Vector3.Lerp(AimIcon.transform.position, BaseAimIconPosition.transform.position, Time.deltaTime * AimingIconMoveSpeed);
-    //    AimIcon.transform.LookAt(Camera.main.transform);
-
         // hide the icon
         AimIcon.SetActive(false);
     }
+    #endregion Aiming Icon
 
-    protected void InstantiateBulletPrefab(GameObject bulletSpawner) // create the bullet
-    {
-        // Create a bullet and place it on the correct trajectory
-        Instantiate<GameObject>(BulletPrefab, bulletSpawner.transform.position, bulletSpawner.transform.rotation);
-
-        // remove one ammo from inventory
-        Ammo = Ammo - 1;
-
-        // display ammo count on the UI
-        if (IsPlayer) 
-            uiManager.SetAmmosDisplay(Ammo);
-    }
-
+    #region Damages & death
     void OnCollisionEnter(Collision collision) // object is collided by anther object, verify if the other is an ennemy bullet
     {
         // verify if the collision is an entering ennemy bullet
@@ -261,7 +282,17 @@ public class BaseController : MonoBehaviour
         {
             // Receive damages from the bullet
             ReceiveDamages(collision.transform.GetComponent<BulletController>().GetDamages());
-        }       
+        } 
+        else if (collision.transform.GetComponent<AmmoBoxManager>())
+        {
+            if (Ammo < MaxAmmo)
+            {
+                // Receive damages from the bullet
+                AddAmmos(collision.transform.GetComponent<AmmoBoxManager>().GetAmmos());
+                Destroy(collision.gameObject);
+
+            }
+        }
     }
 
     protected void ReceiveDamages(int damages) // the object receives damages from a colliding ennemy bullet
@@ -307,26 +338,27 @@ public class BaseController : MonoBehaviour
         }
     }
 
-    void VerifyDestroyedTurretsAmount() // verify if all ennemy turrets are destroyed
-    {
-        // verify if all turrets are destroyed
-        if (tankController.DestroyedTurrets == TurretAmount)
-        {
-            // open win menu if all ennemies are destroyed
-            uiManager.OpenWinMenu();
-        }
-    }
-
     void DestroySelf() // destroy itself and depending objects
     {
         // destroy the object regardless it is the player's tank or a turret
         Destroy(CanonTurret);
         Destroy(gameObject);
-        
+
         // Open the Win Menu if the Player's tank is destroyed 
         if (IsPlayer)
             uiManager.OpenFailMenu();
     }
+
+
+    void AddAmmos(int amount)
+    {
+        Ammo = Ammo + amount;
+        if (Ammo > MaxAmmo) Ammo = MaxAmmo;
+
+
+    }
+
+    #endregion Damages & death
 
     #region UI
 

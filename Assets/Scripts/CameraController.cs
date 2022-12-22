@@ -83,11 +83,14 @@ public class CameraController : MonoBehaviour
 
     // Update is called once per frame      
     void Update()
-    {               
+    {
+        if (!player)
+            return;
+
         if (player.GameStarted)
         {
             RotateCamera();
-        //    HandleCameraCollisions();
+            HandleCameraCollisions();
         }
     }   
 
@@ -144,13 +147,20 @@ public class CameraController : MonoBehaviour
         Vector3 direction = cameraTransform.position - cameraPivot.position;
         direction.Normalize();
 
-
+        // use a raycasr to detect a collision on the way between the camera and the player object
         if (Physics.SphereCast(cameraPivot.transform.position, cameraCollisionRadius, direction, out hit, Mathf.Abs(targetPosition), collisionLayers))
         {
-            Debug.DrawRay(player.transform.position, hit.point);
+            if (player != null)
+            {
+            //    Debug.DrawRay(player.transform.position, hit.point);
 
-            float distanceTo = Vector3.Distance(cameraPivot.position, hit.point);
-            targetPosition = -(distanceTo - cameraCollisionOffset);
+                // Determine the distance from the camera pivot object to the collided object
+                float distanceTo = Vector3.Distance(cameraPivot.position, hit.point);
+
+                // calculate the target position from distance to the collision and applying the offset
+                targetPosition = -(distanceTo - cameraCollisionOffset);
+            }
+            else player = FindObjectOfType<TankController>();
         }
 
         if (Mathf.Abs(targetPosition) < minimumCollisionOffset)
@@ -159,6 +169,10 @@ public class CameraController : MonoBehaviour
         }
 
         cameraVectorPosition.z = Mathf.Lerp(cameraTransform.localPosition.z, targetPosition, 0.2f);
+
+        // verify the distance comparing the max camera distance, assign clamp cameraVectorPosition.z to max camera distance if exceded  
+        if (cameraVectorPosition.z < -distance) cameraVectorPosition.z = -distance;
+
         cameraTransform.localPosition = cameraVectorPosition;
     }
     #endregion Buggé donc désactivé
