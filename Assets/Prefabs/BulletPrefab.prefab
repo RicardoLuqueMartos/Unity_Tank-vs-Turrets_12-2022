@@ -114,8 +114,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MoveSystem: 0
   Damages: 15
-  MaxDistance: 50
-  MoveSpeed: 50
+  MaxDistance: 100
+  MoveSpeed: 500
   bounceForce: 20
 --- !u!54 &5520276340972405961
 Rigidbody:

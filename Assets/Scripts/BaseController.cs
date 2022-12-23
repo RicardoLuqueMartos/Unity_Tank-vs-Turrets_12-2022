@@ -65,6 +65,18 @@ public class BaseController : MonoBehaviour
     [SerializeField]
     protected GameObject CanonTurret;
 
+    [SerializeField]
+    protected GameObject Canon;
+
+    [SerializeField]
+    protected float CanonEulerAnglesOffset = 0f;
+
+ //   [SerializeField]
+ //   protected float CanonMaxAngle = 0f;
+
+    [SerializeField]
+    protected float CanonMinEulerAngle = 100f;
+
     RaycastHit hit;
     RaycastHit hitAim;
 
@@ -179,9 +191,11 @@ public class BaseController : MonoBehaviour
                     // shoot with every spawner
                     for ( int i = 0; i < BulletSpawnersList.Count; i++)
                     {
-                        Debug.Log(i.ToString());
-                        // prepare the bullet to be created
-                        InstantiateBulletPrefab(BulletSpawnersList[i]);
+                        if (BulletSpawnersList[i] != null)
+                        {
+                            // prepare the bullet to be created
+                            InstantiateBulletPrefab(BulletSpawnersList[i]);
+                        }
                     }
                     // prepare the fire rate to be applyed
                     LockCanon();

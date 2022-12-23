@@ -28,8 +28,12 @@ public class CameraController : MonoBehaviour
 
     #region Orbit Variables
     [Header("Orbit Variables")]
+
     [SerializeField]
-    private float distance = 2f;
+    private float PivotHeightOffset = 2.0f;
+
+    [SerializeField]
+    private float maxDistance = 2f;
 
     [SerializeField]
     private float xSpeed = 250.0f;
@@ -102,6 +106,8 @@ public class CameraController : MonoBehaviour
                 cameraPivot = cameraTransform.parent;
 
             // get mouse input and apply the mouse speed offset
+
+            // get position gape between Mouse X and Mouse Y on screen points every frame 
             x += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
             y -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
 
@@ -115,11 +121,11 @@ public class CameraController : MonoBehaviour
 
             // calculate a position from a rotation multiplied by the position of the targeted object
             // minus the distance of the camera
-            var position = rotation * new Vector3(0.0f, 0.0f, -distance) + playerTransform.transform.position;
+            var position = rotation * new Vector3(0.0f, 0.0f, -maxDistance) + playerTransform.transform.position;
 
             cameraPivot.rotation = rotation;
-            cameraPivot.position = position;
-
+        //    cameraPivot.position = position;
+            cameraPivot.position = new Vector3( playerTransform.position.x, playerTransform.position.y +PivotHeightOffset, playerTransform.position.z );
             #endregion apply rotation and position of the camera
         }
     }
@@ -143,19 +149,27 @@ public class CameraController : MonoBehaviour
             cameraPivot = cameraTransform.parent;
 
         float targetPosition = defaultPosition;
-        RaycastHit hit;
-        Vector3 direction = cameraTransform.position - cameraPivot.position;
-        direction.Normalize();
+        RaycastHit hitObstacle;
+        Vector3 direction = cameraTransform.position - cameraPivot.position /*new Vector3(cameraTransform.position.x, cameraTransform.position.y, cameraTransform.position.z-maxDistance)*/;
+     //   direction.Normalize();
+
+        //   bool SomethingOnTheWay = false;
+
+
 
         // use a raycasr to detect a collision on the way between the camera and the player object
-        if (Physics.SphereCast(cameraPivot.transform.position, cameraCollisionRadius, direction, out hit, Mathf.Abs(targetPosition), collisionLayers))
+        if (Physics.SphereCast(player.transform.position, 
+            cameraCollisionRadius, direction, out hitObstacle,  maxDistance, collisionLayers))
         {
+            Debug.DrawLine(player.transform.position, hitObstacle.point, Color.blue);
+
+            Debug.DrawLine(player.transform.position, cameraTransform.position, Color.red);
+
             if (player != null)
             {
-            //    Debug.DrawRay(player.transform.position, hit.point);
 
                 // Determine the distance from the camera pivot object to the collided object
-                float distanceTo = Vector3.Distance(cameraPivot.position, hit.point);
+                float distanceTo = Vector3.Distance(cameraPivot.position, hitObstacle.point);
 
                 // calculate the target position from distance to the collision and applying the offset
                 targetPosition = -(distanceTo - cameraCollisionOffset);
@@ -171,7 +185,10 @@ public class CameraController : MonoBehaviour
         cameraVectorPosition.z = Mathf.Lerp(cameraTransform.localPosition.z, targetPosition, 0.2f);
 
         // verify the distance comparing the max camera distance, assign clamp cameraVectorPosition.z to max camera distance if exceded  
-        if (cameraVectorPosition.z < -distance) cameraVectorPosition.z = -distance;
+        if (cameraVectorPosition.z < -maxDistance)
+        {
+            cameraVectorPosition.z = -maxDistance;
+        }
 
         cameraTransform.localPosition = cameraVectorPosition;
     }

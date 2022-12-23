@@ -84,18 +84,18 @@ public class TankController : BaseController
 
         // Synchronize the rotation of the turret and the camera lookat direction
         // by calculating the degrees to rotate arround the 3 axes from x and z of the turret rotation
-        // and the y of the main camera.
-
-    /*        CanonTurret.transform.localRotation = 
-                Quaternion.Euler(TurretParent.transform.localRotation.x, 
-                Camera.main.transform.eulerAngles.y, TurretParent.transform.localRotation.z);
-      */  
-
-        
+        // and the y of the main camera.        
         CanonTurret.transform.localRotation =
-            Quaternion.Euler(Camera.main.transform.eulerAngles.x -22.5f,
+            Quaternion.Euler(TurretParent.transform.localRotation.x,
             Camera.main.transform.eulerAngles.y, TurretParent.transform.localRotation.z);
-        
+
+        float CanonEulerAngle = Camera.main.transform.eulerAngles.x - CanonEulerAnglesOffset;
+
+        if (Camera.main.transform.eulerAngles.x < CanonMinEulerAngle)
+        {
+            Canon.transform.localRotation = Quaternion.Euler(Camera.main.transform.eulerAngles.x - CanonEulerAnglesOffset,
+                   Canon.transform.localRotation.y, Canon.transform.localRotation.z);
+        }
     }
 
     #endregion Movement & rotation
