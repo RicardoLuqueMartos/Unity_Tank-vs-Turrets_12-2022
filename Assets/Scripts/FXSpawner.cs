@@ -46,14 +46,12 @@ public class FXSpawner : MonoBehaviour
     }
 
     void InstantiateParticles()
-    {
-        //    transform.rotation
-
-     
+    {  
 
         // Instantiate the particle system at the impact position
         GameObject fx = Instantiate<GameObject>(FXs.ParticlesPrefab, transform.position/*+ FXSpawnPositionOffset*/, transform.rotation, transform);
-     //   fx.transform.LookAt(startPosition);
+     
+        //   fx.transform.LookAt(startPosition);
         fx.transform.Rotate(FXSpawnRotationOffset.x, FXSpawnRotationOffset.y, FXSpawnRotationOffset.z);
         fx.transform.Translate(FXSpawnPositionOffset.x, FXSpawnPositionOffset.y, FXSpawnPositionOffset.z);
     }

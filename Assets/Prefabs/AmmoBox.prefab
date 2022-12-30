@@ -227,3 +227,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AmmoAmount: 10
+  PickUpSound: {fileID: 8300000, guid: e1c46a84b68aa3e40b0a7eef9415c86f, type: 3}
+  PickUpSoundPlayerPrefab: {fileID: 5873327869752827242, guid: e0ba92650aaf49d459c27c3d0a823f07, type: 3}

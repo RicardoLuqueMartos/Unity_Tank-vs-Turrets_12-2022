@@ -252,7 +252,7 @@ MonoBehaviour:
   rotationSpeed: 0.5
   playerDetected: 1
   target: {fileID: 0}
-  TurretFireRange: 20
+  TurretFireRange: 30
   viewRadius: 10
   viewAngle: 10
 --- !u!65 &1554966731922870150
