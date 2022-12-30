@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +11,11 @@ public class BulletController : MonoBehaviour
     enum MoveSystemEnum { ByForce, ByTranslate}
     [SerializeField]
     private MoveSystemEnum MoveSystem = new MoveSystemEnum();
+
+
+
+    [SerializeField]
+    private bool ExplodeByItself = false;
 
     [SerializeField]
     private int Damages = 1;
@@ -28,6 +34,18 @@ public class BulletController : MonoBehaviour
     Vector3 StartPosition;
 
     Rigidbody _rigidBody;
+
+    [SerializeField]
+    private GameObject FXSpawnerFireObjPrefab;
+
+    [SerializeField]
+    private GameObject FXSpawnerImpactObjPrefab;
+
+ //   [SerializeField]
+    public GameObject emiter;
+    public GameObject DirObj;
+    Collision _collision;
+
     #endregion Variable
 
     void OnEnable()
@@ -35,6 +53,7 @@ public class BulletController : MonoBehaviour
         StartPosition = transform.position;
         _rigidBody = GetComponent<Rigidbody>();
         moving = true;
+        PlayFireFXs();
     }
 
     private void Update()
@@ -69,27 +88,89 @@ public class BulletController : MonoBehaviour
     }
 
     void OnCollisionEnter(Collision collision) // when the bullet collides with an object
-    {    
-        // Apply an Explosion Force at the collision point
-        ApplyExplosionForce(collision);
-
-        // destroy the bullet after it to collide with anything
+    {
         if (collision.transform.tag != "NoBulletCollision")
-        DestroySelf();
+        {
+            _collision = collision;
+
+            // destroy the bullet after it to collide with anything       
+            DestroySelf();
+        }
     }
 
-    void ApplyExplosionForce(Collision collision) // Apply an Explosion Force at the collision point
+    void ApplyExplosionForce(Vector3 _position, Transform _target) // Apply an Explosion Force at the collision point
     {
         // get the rigidbody of the collided object to apply the explosion force to
-        Rigidbody otherRigidBody = collision.transform.GetComponent<Rigidbody>();
+        
+        if (_target != null){
+            Rigidbody otherRigidBody = _target.GetComponent<Rigidbody>();
 
-        // apply the explosion force to the target rigidbody if relevant
-        if (otherRigidBody != null)       
-            otherRigidBody.AddExplosionForce(bounceForce, collision.contacts[0].point, 5);
+            // apply the explosion force to the target rigidbody if relevant
+            if (otherRigidBody != null)
+                otherRigidBody.AddExplosionForce(bounceForce, _position, 5);
+        }
     }
+
+    #region FXs
+    void PlayFireFXs()
+    {
+        if (FXSpawnerFireObjPrefab != null)
+        {
+            //   GameObject DirObj = emiter.GetComponent<BaseController>().GetFireFXDirectionObj();
+
+            if (DirObj != null)
+            {
+                // Instantiate the particle system at the impact position
+                GameObject spawner = Instantiate<GameObject>(FXSpawnerFireObjPrefab, StartPosition,
+                   DirObj.transform.rotation);
+
+                // assign the origin position of the weapon fire               
+                //   spawner.GetComponent<FXSpawner>().SourceObjPosition = DirObj.transform.position;
+
+
+                spawner.GetComponent<FXSpawner>().startPosition = DirObj.transform.position;
+
+                // launch the FXs system
+                spawner.GetComponent<FXSpawner>().InitSystem(true);
+            }
+        }
+    }
+
+    void PlayImpactFXs(Vector3 _position)
+    {
+        if (FXSpawnerImpactObjPrefab != null)
+        {
+            // Instantiate the particle system at the impact position
+            GameObject spawner = Instantiate<GameObject>(FXSpawnerImpactObjPrefab, _position, new Quaternion(0,0,0,0));
+
+            // assign the origin position of the weapon fire
+            spawner.GetComponent<FXSpawner>().SourceObjPosition = StartPosition;
+
+            // launch the FXs system
+            spawner.GetComponent<FXSpawner>().InitSystem(true);
+        }
+    }
+    #endregion FXs
 
     void DestroySelf() // Destroy the bullet by itself
     {
+        if (ExplodeByItself || _collision != null)
+        {
+            if (_collision != null)
+            {
+                PlayImpactFXs(_collision.GetContact(0).point);
+
+                // Apply an Explosion Force at the collision point
+                ApplyExplosionForce(_collision.GetContact(0).point, _collision.transform);
+            }
+            else
+            {
+                PlayImpactFXs(transform.position);
+                // Apply an Explosion Force at the collision point
+                ApplyExplosionForce(transform.position, null);
+            }
+        }
+
         Destroy(gameObject);
     }
 }

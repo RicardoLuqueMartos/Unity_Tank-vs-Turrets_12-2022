@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,10 @@ public class BaseController : MonoBehaviour
     #region Variables
     [Header("Base Controller")]
     public bool GameStarted = false;
+    
+    enum HowDestroyEnum { DestroyObject, DestroyComponent }
+    [SerializeField]
+    private HowDestroyEnum HowDestroy = new HowDestroyEnum();
 
     [SerializeField]
     int TurretAmount = 10;
@@ -45,11 +50,21 @@ public class BaseController : MonoBehaviour
     private GameObject BulletPrefab;
 
     [SerializeField]
-    private GameObject BulletSpawner;
+    private BulletSpawnerData BulletSpawner;
+
+    [Serializable]
+    public class BulletSpawnerData
+    {
+        public GameObject BulletSpawner;
+        public GameObject FireFXDirection;
+    }
+ //   [SerializeField]
+ //   private BulletSpawnerData BulletSpawnersList = new BulletSpawnerData();
 
     [SerializeField]
-    protected List<GameObject> BulletSpawnersList = new List<GameObject>();
+    protected List<BulletSpawnerData> BulletSpawnersList = new List<BulletSpawnerData>();
 
+   
     [SerializeField]
     private float CanonRotationSpeed = 0.5f;
 
@@ -97,6 +112,18 @@ public class BaseController : MonoBehaviour
 
     [SerializeField]
     float AimingIconOffset = 0.5f;
+
+    [SerializeField]
+    private GameObject FXSpawnerDestroyedObjPrefab;
+
+    [SerializeField]
+    private GameObject DestroyedFXPositionObj;
+
+    [SerializeField]
+    private AudioClip DestroyedSound;
+
+    [SerializeField]
+    private AudioSource DestroyedSoundPlayer;
     #endregion Variables
 
     #region Inits
@@ -112,6 +139,7 @@ public class BaseController : MonoBehaviour
         InitMaxValuesDisplays();
         uiManager.CloseStartMenu();
         GameStarted = true;
+        tankController.StartEngine();
     }
 
     #endregion Inits
@@ -143,7 +171,7 @@ public class BaseController : MonoBehaviour
 
         
 
-        if (!IsPlayer && BulletSpawner != null)
+        if (!IsPlayer && BulletSpawner.BulletSpawner != null)
             TraceBulletTrajectory(BulletSpawner);       
     }
     private void LateUpdate()
@@ -153,7 +181,7 @@ public class BaseController : MonoBehaviour
 
         if (IsPlayer/* && BulletSpawner != null*/)
         {
-            TraceTrajectoryForAimingIcon(BulletSpawner);
+            TraceTrajectoryForAimingIcon(BulletSpawner.BulletSpawner);
         }
     }
     #endregion Updates
@@ -165,20 +193,20 @@ public class BaseController : MonoBehaviour
         if (!CanonLocked && (Ammo > 0 || MaxAmmo == -1))
         {
             // verify the trajectory of the future bullet
-            if (BulletSpawner != null)         
+            if (BulletSpawner.BulletSpawner != null)         
                 TraceBulletTrajectory(BulletSpawner);
 
             // if the object is a turret
             if (!IsPlayer)
             {
-                if (BulletSpawner != null)
+                if (BulletSpawner.BulletSpawner != null)
                 {
                     // Use a raycast to detect if the target is the player's tank and is aimed and no obstacle is on the way, return the aimed object
-                    if (Physics.Raycast(BulletSpawner.transform.position, BulletSpawner.transform.up, out hit)
+                    if (Physics.Raycast(BulletSpawner.BulletSpawner.transform.position, BulletSpawner.BulletSpawner.transform.up, out hit)
                     && hit.collider.transform.GetComponent<TankController>())
                     {
                         // Draw a line in the Editor window from the canon on the trajectory of the future bullet
-                        Debug.DrawRay(BulletSpawner.transform.position, BulletSpawner.transform.up * 20f);
+                        Debug.DrawRay(BulletSpawner.BulletSpawner.transform.position, BulletSpawner.BulletSpawner.transform.up * 20f);
 
                         // prepare the fire rate to be applyed
                         LockCanon();
@@ -191,7 +219,7 @@ public class BaseController : MonoBehaviour
                     // shoot with every spawner
                     for ( int i = 0; i < BulletSpawnersList.Count; i++)
                     {
-                        if (BulletSpawnersList[i] != null)
+                        if (BulletSpawnersList[i].BulletSpawner != null)
                         {
                             // prepare the bullet to be created
                             InstantiateBulletPrefab(BulletSpawnersList[i]);
@@ -226,27 +254,38 @@ public class BaseController : MonoBehaviour
         CanonLocked = false;
     }
 
-    void TraceBulletTrajectory(GameObject bulletSpawner)
+    void TraceBulletTrajectory(BulletSpawnerData bulletSpawner)
     {     
         // Use a raycast to detect if the target is aimed and no obstacle on the way, return the aimed object
-        if (Physics.Raycast(bulletSpawner.transform.position, bulletSpawner.transform.up, out hit))
+        if (Physics.Raycast(bulletSpawner.BulletSpawner.transform.position, bulletSpawner.BulletSpawner.transform.up, out hit))
         {
             // Draw a line in the Editor window from the canon on the trajectory of the future bullet
-            Debug.DrawRay(bulletSpawner.transform.position, bulletSpawner.transform.up * 20f);
+            Debug.DrawRay(bulletSpawner.BulletSpawner.transform.position, bulletSpawner.BulletSpawner.transform.up * 20f);
         }
     }
 
-    protected void InstantiateBulletPrefab(GameObject bulletSpawner) // create the bullet
+    protected void InstantiateBulletPrefab(BulletSpawnerData bulletSpawner) // create the bullet
     {
-        // Create a bullet and place it on the correct trajectory
-        Instantiate<GameObject>(BulletPrefab, bulletSpawner.transform.position, bulletSpawner.transform.rotation);
+        if (bulletSpawner != null)
+        {
+            // Create a bullet and place it on the correct trajectory
+            GameObject bullet = Instantiate<GameObject>(BulletPrefab, bulletSpawner.BulletSpawner.transform.position, bulletSpawner.BulletSpawner.transform.rotation);
+            bullet.transform.GetComponent<BulletController>().emiter = bulletSpawner.BulletSpawner;
+            bullet.transform.GetComponent<BulletController>().DirObj = bulletSpawner.FireFXDirection;
+            bullet.gameObject.SetActive(true);
+            
+            // remove one ammo from inventory
+            Ammo = Ammo - 1;
 
-        // remove one ammo from inventory
-        Ammo = Ammo - 1;
-
-        // display ammo count on the UI
-        if (IsPlayer)
-            uiManager.SetAmmosDisplay(Ammo);
+            // display ammo count on the UI
+            if (IsPlayer)
+                uiManager.SetAmmosDisplay(Ammo);
+        }
+    }
+    
+    public GameObject GetFireFXDirectionObj()
+    {
+        return BulletSpawner.FireFXDirection;
     }
     #endregion Firing
 
@@ -357,14 +396,55 @@ public class BaseController : MonoBehaviour
 
     void DestroySelf() // destroy itself and depending objects
     {
-        // destroy the object regardless it is the player's tank or a turret
-        Destroy(CanonTurret);
-        Destroy(gameObject);
+        if (HowDestroy == HowDestroyEnum.DestroyObject) {
+            // destroy the object regardless it is the player's tank or a turret
+            Destroy(CanonTurret);
+            Destroy(gameObject);
+    
+        }
+        else if (HowDestroy == HowDestroyEnum.DestroyComponent)
+        {
+            // destroy the object regardless it is the player's tank or a turret
+            this.enabled = false;
+          
+
+        }
+
+        InstantiateFXForDestruction();
+        PlayDestructionSound();
 
         // Open the Win Menu if the Player's tank is destroyed 
         if (IsPlayer)
+        {
             uiManager.OpenFailMenu();
+            tankController.GameStarted = false;
+        }
     }
+
+    void InstantiateFXForDestruction()
+    {
+        if (FXSpawnerDestroyedObjPrefab != null)
+        {
+            // Instantiate the particle system at the impact position
+            GameObject spawner = Instantiate<GameObject>(FXSpawnerDestroyedObjPrefab, DestroyedFXPositionObj.transform.position,
+               DestroyedFXPositionObj.transform.rotation);
+        }
+    }
+
+    void PlayDestructionSound()
+    {
+        if (DestroyedSoundPlayer != null)
+        {
+            DestroyedSoundPlayer.enabled = true;
+            DestroyedSoundPlayer.Stop();
+            DestroyedSoundPlayer.loop = false;
+            DestroyedSoundPlayer.PlayOneShot(DestroyedSound);
+        }
+
+    }
+
+
+    #endregion Damages & death
 
 
     void AddAmmos(int amount)
@@ -374,8 +454,6 @@ public class BaseController : MonoBehaviour
 
 
     }
-
-    #endregion Damages & death
 
     #region UI
 

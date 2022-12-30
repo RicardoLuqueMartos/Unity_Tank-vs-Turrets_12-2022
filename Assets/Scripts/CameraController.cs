@@ -9,7 +9,10 @@ public class CameraController : MonoBehaviour
 {
     #region Variables
     [SerializeField]
-    BaseController player;
+    TankController player;
+
+ //   [SerializeField]
+ //   TankController tank;
 
     [SerializeField]
     public Transform targetTransform;
@@ -105,6 +108,11 @@ public class CameraController : MonoBehaviour
             if (cameraPivot == null)
                 cameraPivot = cameraTransform.parent;
 
+            // handle turret rotation audio
+            if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0)
+                player.HandleTurretRotateSound();
+            else player.StopTurretRotateSound();
+
             // get mouse input and apply the mouse speed offset
 
             // get position gape between Mouse X and Mouse Y on screen points every frame 
@@ -127,6 +135,8 @@ public class CameraController : MonoBehaviour
         //    cameraPivot.position = position;
             cameraPivot.position = new Vector3( playerTransform.position.x, playerTransform.position.y +PivotHeightOffset, playerTransform.position.z );
             #endregion apply rotation and position of the camera
+
+            
         }
     }
 
@@ -142,7 +152,6 @@ public class CameraController : MonoBehaviour
         return Mathf.Clamp(angle, min, max);
     }
 
-    #region Buggé donc désactivé
     private void HandleCameraCollisions()
     {
         if (cameraPivot == null)        
@@ -192,6 +201,5 @@ public class CameraController : MonoBehaviour
 
         cameraTransform.localPosition = cameraVectorPosition;
     }
-    #endregion Buggé donc désactivé
 
 }
