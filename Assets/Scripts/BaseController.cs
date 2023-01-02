@@ -29,6 +29,11 @@ public class BaseController : MonoBehaviour
     public TankController tankController;
 
     [SerializeField]
+    protected GameObject AimedDestroyableObject;
+    [SerializeField]
+    protected GameObject PreviouslyAimedDestroyableObject;
+
+    [SerializeField]
     protected int MaxLifePoint = 1; // -1 means infinite
 
     [SerializeField]
@@ -124,6 +129,9 @@ public class BaseController : MonoBehaviour
 
     [SerializeField]
     private AudioSource DestroyedSoundPlayer;
+
+    [SerializeField]
+    protected TurretHealthBar healthbar;
     #endregion Variables
 
     #region Inits
@@ -132,6 +140,9 @@ public class BaseController : MonoBehaviour
         tankController = FindObjectOfType<TankController>();
         uiManager = FindObjectOfType<UIManager>();
         DetectTurretsAmount();
+
+        if (healthbar != null)
+            healthbar.maxHealthPoints = MaxLifePoint;
     }
 
     public void StartGame()
@@ -139,10 +150,20 @@ public class BaseController : MonoBehaviour
         InitMaxValuesDisplays();
         uiManager.CloseStartMenu();
         GameStarted = true;
-        tankController.StartEngine();
+        tankController.StartEngine();        
     }
 
     #endregion Inits
+
+    public int GetLifePoints()
+    {
+        return LifePoint;
+    }
+
+    public int GetMaxLifePoints()
+    {
+        return MaxLifePoint;
+    }
 
     #region About Enemy Turrets
     void DetectTurretsAmount()
@@ -168,8 +189,6 @@ public class BaseController : MonoBehaviour
     {
         if (!GameStarted)
             return;
-
-        
 
         if (!IsPlayer && BulletSpawner.BulletSpawner != null)
             TraceBulletTrajectory(BulletSpawner);       
@@ -271,7 +290,7 @@ public class BaseController : MonoBehaviour
             // Create a bullet and place it on the correct trajectory
             GameObject bullet = Instantiate<GameObject>(BulletPrefab, bulletSpawner.BulletSpawner.transform.position, bulletSpawner.BulletSpawner.transform.rotation);
             bullet.transform.GetComponent<BulletController>().emiter = bulletSpawner.BulletSpawner;
-            bullet.transform.GetComponent<BulletController>().DirObj = bulletSpawner.FireFXDirection;
+            bullet.transform.GetComponent<BulletController>().dirObj = bulletSpawner.FireFXDirection;
             bullet.gameObject.SetActive(true);
             
             // remove one ammo from inventory
@@ -317,6 +336,33 @@ public class BaseController : MonoBehaviour
         // rotate the icon to face the camera
         AimIcon.transform.LookAt(Camera.main.transform);
 
+        if (IsPlayer && aimed.transform.GetComponent<TurretController>() == true)
+        {
+            if (AimedDestroyableObject != null)
+            {
+                if (PreviouslyAimedDestroyableObject != null 
+                    && PreviouslyAimedDestroyableObject.GetComponent<TurretController>())                
+                    PreviouslyAimedDestroyableObject.GetComponent<TurretController>().NoMoreAimed();
+                PreviouslyAimedDestroyableObject = AimedDestroyableObject;
+            }
+            AimedDestroyableObject = aimed.transform.gameObject;
+            AimedDestroyableObject.GetComponent<TurretController>().SetAsAimed();
+        }
+        else if (IsPlayer && aimed.transform.GetComponent<DestroyMeByBullets>() == true)
+        {
+            if (AimedDestroyableObject != null 
+                && AimedDestroyableObject.GetComponent<DestroyMeByBullets>())
+            {
+                if (PreviouslyAimedDestroyableObject != null
+                    && PreviouslyAimedDestroyableObject.GetComponent<DestroyMeByBullets>())
+                    PreviouslyAimedDestroyableObject.GetComponent<DestroyMeByBullets>().NoMoreAimed();
+                PreviouslyAimedDestroyableObject = AimedDestroyableObject;
+            }
+            AimedDestroyableObject = aimed.transform.gameObject;
+            AimedDestroyableObject.GetComponent<DestroyMeByBullets>().SetAsAimed();
+        }
+        else HideEnemyHealthbar();
+
         #endregion Draw Aiming Icon for player on target
     }
 
@@ -324,6 +370,28 @@ public class BaseController : MonoBehaviour
     {
         // hide the icon
         AimIcon.SetActive(false);
+        // hide enemy healthbar
+        HideEnemyHealthbar();
+    }
+
+    void HideEnemyHealthbar()
+    {       
+        // hide enemy healthbar
+        if (PreviouslyAimedDestroyableObject != null
+            && PreviouslyAimedDestroyableObject.transform.GetComponent<TurretController>())
+            PreviouslyAimedDestroyableObject.GetComponent<TurretController>().NoMoreAimed();
+
+        else if (AimedDestroyableObject != null
+            && AimedDestroyableObject.transform.GetComponent<TurretController>())
+            AimedDestroyableObject.GetComponent<TurretController>().NoMoreAimed();
+
+        else if (PreviouslyAimedDestroyableObject != null
+            && PreviouslyAimedDestroyableObject.transform.GetComponent<DestroyMeByBullets>())
+            PreviouslyAimedDestroyableObject.GetComponent<DestroyMeByBullets>().NoMoreAimed();
+
+        else if (AimedDestroyableObject != null
+            && AimedDestroyableObject.transform.GetComponent<DestroyMeByBullets>())
+            AimedDestroyableObject.GetComponent<DestroyMeByBullets>().NoMoreAimed();
     }
     #endregion Aiming Icon
 
@@ -346,7 +414,7 @@ public class BaseController : MonoBehaviour
                 Destroy(collision.gameObject);
 
                 if (IsPlayer)
-                    uiManager.SetAmmosDisplay(Ammo);
+                    uiManager.SetAmmosDisplay(Ammo);               
             }
         }
     }
@@ -391,6 +459,8 @@ public class BaseController : MonoBehaviour
             // update UI about life points
             if (IsPlayer)
                 uiManager.SetLifePointsDisplay(LifePoint);
+            else if (healthbar != null)
+                healthbar.UpdateHealthBar(LifePoint);
         }
     }
 
@@ -442,10 +512,7 @@ public class BaseController : MonoBehaviour
         }
 
     }
-
-
     #endregion Damages & death
-
 
     void AddAmmos(int amount)
     {
@@ -456,7 +523,6 @@ public class BaseController : MonoBehaviour
     }
 
     #region UI
-
     void InitMaxValuesDisplays() // Assign the max values to the UI at game init
     {
         // Set initially all the UI about Life points, ammos and turrets
@@ -467,7 +533,7 @@ public class BaseController : MonoBehaviour
         uiManager.SetTurretsAmountDisplay(TurretAmount);
 
         uiManager.SetAmmosDisplay(Ammo);
-        uiManager.SetMaxAmmosDisplay(MaxAmmo);
+        uiManager.SetMaxAmmosDisplay(MaxAmmo);        
     }   
     #endregion UI
 }

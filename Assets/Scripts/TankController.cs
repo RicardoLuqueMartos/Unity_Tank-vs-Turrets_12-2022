@@ -10,33 +10,33 @@ public class TankController : BaseController
     [Header("Tank Controller")]    
 
     [SerializeField]
-    float MaxVelocity = 1.0f;
+    float maxVelocity = 1.0f;
 
     [SerializeField]
-    float Velocity = 1.0f;
+    float velocity = 1.0f;
 
     [SerializeField]
-    float RotationSpeed = 1.0f;       
+    float rotationSpeed = 1.0f;       
 
     Rigidbody _rigidBody;       
 
     [SerializeField]
-    GameObject cameraObject;
-
+    GameObject cameraObject;    
+    
     public enum StateEnum { Starting, Idle, MoveForward, MoveBackward, RotateInPlace, Destroyed }
 
     [SerializeField]
-    StateEnum State = StateEnum.Starting;
+    StateEnum state = StateEnum.Starting;
    
     [SerializeField]
-    float StartingEngineDuration = 1.0f;
+    float startingEngineDuration = 1.0f;
 
     [Serializable]
     public class FXData
     {
-        public GameObject SmockParticlesPrefab;
+        public GameObject smockParticlesPrefab;
        
-        public SoundFXData SoundFXs = new SoundFXData();
+        public SoundFXData soundFXs = new SoundFXData();
     }
 
     [Serializable]
@@ -58,7 +58,7 @@ public class TankController : BaseController
         //   public List<AudioClip> MoveRotateInPlaceSoundsList = new List<AudioClip>();
     }
     [SerializeField]
-    private FXData FXs = new FXData();
+    private FXData fXs = new FXData();
     #endregion Variables
 
     private void Start()
@@ -69,23 +69,22 @@ public class TankController : BaseController
 
     public void StartEngine()
     {
-        FXs.SoundFXs.MoveSoundPlayer.enabled = true;
-        FXs.SoundFXs.MoveSoundPlayer.PlayOneShot(FXs.SoundFXs.StartingSound);
-        Invoke("StartIdleSound", StartingEngineDuration/2);
-        Invoke("EngineStarted", StartingEngineDuration);
+        fXs.soundFXs.MoveSoundPlayer.enabled = true;
+        fXs.soundFXs.MoveSoundPlayer.PlayOneShot(fXs.soundFXs.StartingSound);
+        Invoke("StartIdleSound", startingEngineDuration/2);
+        Invoke("EngineStarted", startingEngineDuration);
     }
     public void StartIdleSound()
     {
-        FXs.SoundFXs.IdleSoundPlayer.enabled = true;
-        FXs.SoundFXs.IdleSoundPlayer.loop = true;
-        FXs.SoundFXs.MoveSoundPlayer.clip = FXs.SoundFXs.IdleSound;
-        FXs.SoundFXs.MoveSoundPlayer.Play();
+        fXs.soundFXs.IdleSoundPlayer.enabled = true;
+        fXs.soundFXs.IdleSoundPlayer.loop = true;
+        fXs.soundFXs.MoveSoundPlayer.clip = fXs.soundFXs.IdleSound;
+        fXs.soundFXs.MoveSoundPlayer.Play();
     }
-
-    void EngineStarted()
+        void EngineStarted()
     {
-        State = StateEnum.Idle;
-        FXs.SoundFXs.MoveSoundPlayer.loop = true;
+        state = StateEnum.Idle;
+        fXs.soundFXs.MoveSoundPlayer.loop = true;
     }
 
     void Update()
@@ -93,7 +92,7 @@ public class TankController : BaseController
         if (!GameStarted)
             return;
 
-        if (State == StateEnum.Starting)
+        if (state == StateEnum.Starting)
             return;
 
         UpdateInput();
@@ -102,34 +101,34 @@ public class TankController : BaseController
 
     void UpdateAudio()
     {
-        if (State != StateEnum.Idle)
+        if (state != StateEnum.Idle)
         {
-            if (State == StateEnum.MoveForward
-                && FXs.SoundFXs.MoveSoundPlayer.clip != FXs.SoundFXs.MoveForwardSound)
+            if (state == StateEnum.MoveForward
+                && fXs.soundFXs.MoveSoundPlayer.clip != fXs.soundFXs.MoveForwardSound)
             {
-                FXs.SoundFXs.MoveSoundPlayer.Stop();
-                FXs.SoundFXs.MoveSoundPlayer.clip = FXs.SoundFXs.MoveForwardSound;
-                FXs.SoundFXs.MoveSoundPlayer.Play();
+                fXs.soundFXs.MoveSoundPlayer.Stop();
+                fXs.soundFXs.MoveSoundPlayer.clip = fXs.soundFXs.MoveForwardSound;
+                fXs.soundFXs.MoveSoundPlayer.Play();
             }
-            else if (State == StateEnum.MoveBackward
-                && FXs.SoundFXs.MoveSoundPlayer.clip != FXs.SoundFXs.MoveBackwardSound)
+            else if (state == StateEnum.MoveBackward
+                && fXs.soundFXs.MoveSoundPlayer.clip != fXs.soundFXs.MoveBackwardSound)
             {
-                FXs.SoundFXs.MoveSoundPlayer.Stop();
-                FXs.SoundFXs.MoveSoundPlayer.clip = FXs.SoundFXs.MoveBackwardSound;
-                FXs.SoundFXs.MoveSoundPlayer.Play();
+                fXs.soundFXs.MoveSoundPlayer.Stop();
+                fXs.soundFXs.MoveSoundPlayer.clip = fXs.soundFXs.MoveBackwardSound;
+                fXs.soundFXs.MoveSoundPlayer.Play();
             }
-            else if (State == StateEnum.RotateInPlace
-                && FXs.SoundFXs.MoveSoundPlayer.clip != FXs.SoundFXs.RotateSound)
+            else if (state == StateEnum.RotateInPlace
+                && fXs.soundFXs.MoveSoundPlayer.clip != fXs.soundFXs.RotateSound)
             {
-                FXs.SoundFXs.MoveSoundPlayer.Stop();
-                FXs.SoundFXs.MoveSoundPlayer.clip = FXs.SoundFXs.RotateSound;
-                FXs.SoundFXs.MoveSoundPlayer.Play();
+                fXs.soundFXs.MoveSoundPlayer.Stop();
+                fXs.soundFXs.MoveSoundPlayer.clip = fXs.soundFXs.RotateSound;
+                fXs.soundFXs.MoveSoundPlayer.Play();
             }
         }
         else
         {
-            FXs.SoundFXs.MoveSoundPlayer.Stop();
-            FXs.SoundFXs.MoveSoundPlayer.clip = null;
+            fXs.soundFXs.MoveSoundPlayer.Stop();
+            fXs.soundFXs.MoveSoundPlayer.clip = null;
         }
     }
 
@@ -147,17 +146,17 @@ public class TankController : BaseController
         // get the input and move the tank forward and backward depending of the max velocity
         if (Input.GetAxis("Vertical") > 0 || Input.GetKey(KeyCode.Z))
         {
-            transform.Translate(Vector3.forward * (Time.deltaTime * MaxVelocity));
-            State = StateEnum.MoveForward;
+            transform.Translate(Vector3.forward * (Time.deltaTime * maxVelocity));
+            state = StateEnum.MoveForward;
         }
         else if (Input.GetAxis("Vertical") < 0 || Input.GetKey(KeyCode.S))
         {
-            transform.Translate(Vector3.back * (Time.deltaTime * MaxVelocity));
-            State = StateEnum.MoveBackward;
+            transform.Translate(Vector3.back * (Time.deltaTime * maxVelocity));
+            state = StateEnum.MoveBackward;
         }
         else
         {
-            State = StateEnum.Idle;
+            state = StateEnum.Idle;
         }
     }
 
@@ -166,14 +165,14 @@ public class TankController : BaseController
         if (Input.GetAxis("Horizontal") != 0)
         {
             // rotate Horizontally the body of the tank by getting the input value and multiplying it by the rotation speed
-            transform.Rotate(0.0f, Input.GetAxis("Horizontal") * RotationSpeed, 0.0f, Space.World);
+            transform.Rotate(0.0f, Input.GetAxis("Horizontal") * rotationSpeed, 0.0f, Space.World);
 
-            if (State == StateEnum.Idle && (Input.GetAxis("Vertical") == 0 || Input.GetKey(KeyCode.None)))
-                State = StateEnum.RotateInPlace;
+            if (state == StateEnum.Idle && (Input.GetAxis("Vertical") == 0 || Input.GetKey(KeyCode.None)))
+                state = StateEnum.RotateInPlace;
         }
         else if (Input.GetAxis("Vertical") == 0 || Input.GetKey(KeyCode.None) )
         {
-            State = StateEnum.Idle;
+            state = StateEnum.Idle;
         }
 
     }
@@ -206,19 +205,19 @@ public class TankController : BaseController
 
     public void HandleTurretRotateSound()
     {
-        if (FXs.SoundFXs.TurretRotateSoundPlayer.clip != FXs.SoundFXs.TurretRotateSound)
+        if (fXs.soundFXs.TurretRotateSoundPlayer.clip != fXs.soundFXs.TurretRotateSound)
         {
-            FXs.SoundFXs.TurretRotateSoundPlayer.enabled = true;
-            FXs.SoundFXs.TurretRotateSoundPlayer.loop = true;
-            FXs.SoundFXs.TurretRotateSoundPlayer.clip = FXs.SoundFXs.TurretRotateSound;
-            FXs.SoundFXs.TurretRotateSoundPlayer.Play();
+            fXs.soundFXs.TurretRotateSoundPlayer.enabled = true;
+            fXs.soundFXs.TurretRotateSoundPlayer.loop = true;
+            fXs.soundFXs.TurretRotateSoundPlayer.clip = fXs.soundFXs.TurretRotateSound;
+            fXs.soundFXs.TurretRotateSoundPlayer.Play();
         }
     }
 
     public void StopTurretRotateSound()
     {
-        FXs.SoundFXs.TurretRotateSoundPlayer.Stop();
-        FXs.SoundFXs.TurretRotateSoundPlayer.clip = null;
+        fXs.soundFXs.TurretRotateSoundPlayer.Stop();
+        fXs.soundFXs.TurretRotateSoundPlayer.clip = null;
     }
 
     #endregion Movement & rotation

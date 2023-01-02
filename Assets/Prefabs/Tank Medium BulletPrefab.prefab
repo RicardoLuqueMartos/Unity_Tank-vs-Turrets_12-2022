@@ -112,16 +112,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70e04ebc5c78f1841886a4a5defcd721, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MoveSystem: 1
-  ExplodeByItself: 1
-  Damages: 15
-  MaxDistance: 100
-  MoveSpeed: 100
+  moveSystem: 1
+  explodeByItself: 1
+  damages: 20
+  maxDistance: 50
+  moveSpeed: 100
   bounceForce: 20
-  FXSpawnerFireObjPrefab: {fileID: 1022132062681268278, guid: 08a4e9291650bf043a56acaf6143a953, type: 3}
-  FXSpawnerImpactObjPrefab: {fileID: 6958624369854577104, guid: 0beba7eeeef9f4a4c8cbfb67386c62e1, type: 3}
+  fXSpawnerFireObjPrefab: {fileID: 1022132062681268278, guid: 08a4e9291650bf043a56acaf6143a953, type: 3}
+  fXSpawnerImpactObjPrefab: {fileID: 6958624369854577104, guid: 0beba7eeeef9f4a4c8cbfb67386c62e1, type: 3}
   emiter: {fileID: 0}
-  DirObj: {fileID: 0}
+  dirObj: {fileID: 0}
 --- !u!54 &5520276340972405961
 Rigidbody:
   m_ObjectHideFlags: 0

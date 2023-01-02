@@ -226,6 +226,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2feead36fc970b4c9c8e1d5b44788c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AmmoAmount: 10
-  PickUpSound: {fileID: 8300000, guid: e1c46a84b68aa3e40b0a7eef9415c86f, type: 3}
-  PickUpSoundPlayerPrefab: {fileID: 5873327869752827242, guid: e0ba92650aaf49d459c27c3d0a823f07, type: 3}
+  ammoAmount: 10
+  pickUpSound: {fileID: 8300000, guid: e1c46a84b68aa3e40b0a7eef9415c86f, type: 3}
+  pickUpSoundPlayerPrefab: {fileID: 5873327869752827242, guid: e0ba92650aaf49d459c27c3d0a823f07, type: 3}

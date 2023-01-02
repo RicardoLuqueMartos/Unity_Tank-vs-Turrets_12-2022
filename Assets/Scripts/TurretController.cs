@@ -31,6 +31,9 @@ public class TurretController : BaseController
 
     [SerializeField]
     float viewAngle = 10f;
+
+    
+
     #endregion Variables
 
     private void Awake()
@@ -101,5 +104,15 @@ public class TurretController : BaseController
     void HandleFire()
     {
         Fire();
+    }
+
+    public void SetAsAimed()
+    {
+        if (healthbar != null) healthbar.gameObject.SetActive(true);
+    }
+
+    public void NoMoreAimed()
+    {
+        if (healthbar != null) healthbar.gameObject.SetActive(false);
     }
 }

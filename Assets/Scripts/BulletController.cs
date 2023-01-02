@@ -10,47 +10,47 @@ public class BulletController : MonoBehaviour
     #region Variable
     enum MoveSystemEnum { ByForce, ByTranslate}
     [SerializeField]
-    private MoveSystemEnum MoveSystem = new MoveSystemEnum();
+    private MoveSystemEnum moveSystem = new MoveSystemEnum();
 
 
 
     [SerializeField]
-    private bool ExplodeByItself = false;
+    private bool explodeByItself = false;
 
     [SerializeField]
-    private int Damages = 1;
+    private int damages = 1;
 
     [SerializeField]
-    private float MaxDistance = 1;
+    private float maxDistance = 1;
 
     [SerializeField]
-    private float MoveSpeed = 20;
+    private float moveSpeed = 20;
 
     bool moving = true;
 
     [SerializeField]
     private float bounceForce = 20;
 
-    Vector3 StartPosition;
+    Vector3 startPosition;
 
     Rigidbody _rigidBody;
 
     [SerializeField]
-    private GameObject FXSpawnerFireObjPrefab;
+    private GameObject fXSpawnerFireObjPrefab;
 
     [SerializeField]
-    private GameObject FXSpawnerImpactObjPrefab;
+    private GameObject fXSpawnerImpactObjPrefab;
 
  //   [SerializeField]
     public GameObject emiter;
-    public GameObject DirObj;
+    public GameObject dirObj;
     Collision _collision;
 
     #endregion Variable
 
     void OnEnable()
     {
-        StartPosition = transform.position;
+        startPosition = transform.position;
         _rigidBody = GetComponent<Rigidbody>();
         moving = true;
         PlayFireFXs();
@@ -60,31 +60,31 @@ public class BulletController : MonoBehaviour
     {
         if (moving) // the bullet has been shot and a force is applied to it
         {
-            if (MoveSystem == MoveSystemEnum.ByForce)
+            if (moveSystem == MoveSystemEnum.ByForce)
             {
                 //apply a force to the bullet to move it
-                _rigidBody.AddForce(transform.up * MoveSpeed);
+                _rigidBody.AddForce(transform.up * moveSpeed);
             }
-            else if (MoveSystem == MoveSystemEnum.ByTranslate)
+            else if (moveSystem == MoveSystemEnum.ByTranslate)
             {
-                transform.Translate(Vector3.up * (Time.deltaTime * MoveSpeed));
+                transform.Translate(Vector3.up * (Time.deltaTime * moveSpeed));
             }
         }
 
         // get the distance between
-        if (GetDistance() >= MaxDistance) DestroySelf();
+        if (GetDistance() >= maxDistance) DestroySelf();
     }
 
     float GetDistance() // returns the distance between the Bullet and its starting position 
     {
-        float distance = Vector3.Distance(StartPosition, transform.position);
+        float distance = Vector3.Distance(startPosition, transform.position);
 
         return distance;
     }
 
     public int GetDamages() // returns the damages from the bullet to apply to the target
     {
-        return Damages;
+        return damages;
     }
 
     void OnCollisionEnter(Collision collision) // when the bullet collides with an object
@@ -114,21 +114,21 @@ public class BulletController : MonoBehaviour
     #region FXs
     void PlayFireFXs()
     {
-        if (FXSpawnerFireObjPrefab != null)
+        if (fXSpawnerFireObjPrefab != null)
         {
             //   GameObject DirObj = emiter.GetComponent<BaseController>().GetFireFXDirectionObj();
 
-            if (DirObj != null)
+            if (dirObj != null)
             {
                 // Instantiate the particle system at the impact position
-                GameObject spawner = Instantiate<GameObject>(FXSpawnerFireObjPrefab, StartPosition,
-                   DirObj.transform.rotation);
+                GameObject spawner = Instantiate<GameObject>(fXSpawnerFireObjPrefab, startPosition,
+                   dirObj.transform.rotation);
 
                 // assign the origin position of the weapon fire               
                 //   spawner.GetComponent<FXSpawner>().SourceObjPosition = DirObj.transform.position;
 
 
-                spawner.GetComponent<FXSpawner>().startPosition = DirObj.transform.position;
+                spawner.GetComponent<FXSpawner>().startPosition = dirObj.transform.position;
 
                 // launch the FXs system
                 spawner.GetComponent<FXSpawner>().InitSystem(true);
@@ -138,13 +138,13 @@ public class BulletController : MonoBehaviour
 
     void PlayImpactFXs(Vector3 _position)
     {
-        if (FXSpawnerImpactObjPrefab != null)
+        if (fXSpawnerImpactObjPrefab != null)
         {
             // Instantiate the particle system at the impact position
-            GameObject spawner = Instantiate<GameObject>(FXSpawnerImpactObjPrefab, _position, new Quaternion(0,0,0,0));
+            GameObject spawner = Instantiate<GameObject>(fXSpawnerImpactObjPrefab, _position, new Quaternion(0,0,0,0));
 
             // assign the origin position of the weapon fire
-            spawner.GetComponent<FXSpawner>().SourceObjPosition = StartPosition;
+            spawner.GetComponent<FXSpawner>().SourceObjPosition = startPosition;
 
             // launch the FXs system
             spawner.GetComponent<FXSpawner>().InitSystem(true);
@@ -154,7 +154,7 @@ public class BulletController : MonoBehaviour
 
     void DestroySelf() // Destroy the bullet by itself
     {
-        if (ExplodeByItself || _collision != null)
+        if (explodeByItself || _collision != null)
         {
             if (_collision != null)
             {

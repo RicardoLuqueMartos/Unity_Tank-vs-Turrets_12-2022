@@ -10,47 +10,50 @@ public class UIManager : MonoBehaviour
 {
     #region Variables
     [SerializeField]
-    RectTransform GameUI;
+    RectTransform gameUI;
 
     [SerializeField]
     RectTransform startMenu;
 
     [SerializeField]
-    RectTransform FailMenu;
+    RectTransform failMenu;
 
     [SerializeField]
-    RectTransform WinMenu;
+    RectTransform winMenu;
 
     [SerializeField]
-    TMP_Text AmmosText;
+    TMP_Text ammosText;
 
     [SerializeField]
-    TMP_Text MaxAmmosText;
+    TMP_Text maxAmmosText;
 
     [SerializeField]
-    TMP_Text LifeText;
+    TMP_Text lifeText;
 
     [SerializeField]
-    TMP_Text MaxLifeText;
+    TMP_Text maxLifeText;
 
     [SerializeField]
-    TMP_Text DestroyedTurretsText;
+    TMP_Text destroyedTurretsText;
 
     [SerializeField]
-    TMP_Text TurretsAmountText;
+    TMP_Text turretsAmountText;
 
+    [SerializeField]
+    PlayerHealthBar playerHealthBar;
 
     #endregion Variables
 
     #region Max Values Init
     public void SetMaxLifePointsDisplay(int value)
     {
-        MaxLifeText.text = value.ToString();
+        maxLifeText.text = value.ToString();
+        playerHealthBar.maxHealthPoints = value;
     }
 
     public void SetTurretsAmountDisplay(int value)
     {
-        TurretsAmountText.text = value.ToString();
+        turretsAmountText.text = value.ToString();
     }
 
     public void SetMaxAmmosDisplay(int value)
@@ -59,28 +62,34 @@ public class UIManager : MonoBehaviour
 
         if (value == -1) textToDisplay = "Inf";
 
-        MaxAmmosText.text = textToDisplay;
+        maxAmmosText.text = textToDisplay;
     }
     #endregion Max Values Init
 
     #region Values Update
     public void SetLifePointsDisplay(int value)
     {
-        LifeText.text = value.ToString();
+        lifeText.text = value.ToString();
+        UpdateLifebar(value);
+    }
+
+    void UpdateLifebar(int value)
+    {
+        playerHealthBar.UpdateHealthBar(value);
     }
 
     public void SetDestroyedTurretsDisplay(int value)
     {
-        DestroyedTurretsText.text = value.ToString();
+        destroyedTurretsText.text = value.ToString();
     }
 
     public void SetAmmosDisplay(int value)
     {
         string textToDisplay = value.ToString();
 
-        if (MaxAmmosText.text == "Inf") textToDisplay = "Inf";
+        if (maxAmmosText.text == "Inf") textToDisplay = "Inf";
 
-        AmmosText.text = textToDisplay;
+        ammosText.text = textToDisplay;
     }
     #endregion Values Update
 
@@ -93,24 +102,24 @@ public class UIManager : MonoBehaviour
     #region Open / Close Menus
     public void OpenGameUI()
     {
-        GameUI.gameObject.SetActive(true);
+        gameUI.gameObject.SetActive(true);
     }
 
     public void CloseGameUI()
     {
-        GameUI.gameObject.SetActive(false);
+        gameUI.gameObject.SetActive(false);
     }
 
     public void OpenWinMenu()
     {
         CloseGameUI();
-        WinMenu.gameObject.SetActive(true);
+        winMenu.gameObject.SetActive(true);
     }
 
     public void OpenFailMenu()
     {
         CloseGameUI();
-        FailMenu.gameObject.SetActive(true);
+        failMenu.gameObject.SetActive(true);
     }
 
     #endregion Open / Close Menus

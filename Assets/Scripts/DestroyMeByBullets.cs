@@ -13,6 +13,26 @@ public class DestroyMeByBullets : MonoBehaviour
     [SerializeField]
     protected int LifePoint = 1;
 
+    [SerializeField]
+    TurretHealthBar healthbar;
+
+
+    private void OnEnable()
+    {
+        if (healthbar != null)
+            healthbar.maxHealthPoints = MaxLifePoint;
+    }
+
+    public void SetAsAimed()
+    {
+        if (healthbar != null) healthbar.gameObject.SetActive(true);
+    }
+
+    public void NoMoreAimed()
+    {
+        if (healthbar != null) healthbar.gameObject.SetActive(false);
+    }
+
     #region Damages & death
     void OnCollisionEnter(Collision collision) // object is collided by anther object, verify if the other is an ennemy bullet
     {
@@ -45,6 +65,9 @@ public class DestroyMeByBullets : MonoBehaviour
                 LifePoint = LifePoint - damages;
             }
         }
+
+        if (healthbar != null)
+            healthbar.UpdateHealthBar(LifePoint);
     }
 
     void DestroySelf() // destroy itself and depending objects
