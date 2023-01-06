@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DestroyMeByBullets : MonoBehaviour
@@ -16,6 +17,23 @@ public class DestroyMeByBullets : MonoBehaviour
     [SerializeField]
     TurretHealthBar healthbar;
 
+    [SerializeField]
+    GameObject FXSpawnPoint;
+
+    [SerializeField]
+    GameObject FXPrefab;
+
+    [SerializeField]
+    GameObject SpawnedFX;
+    enum HowDestroyEnum { DestroyObject, DisableComponent }
+    [SerializeField]
+    private HowDestroyEnum HowDestroy = new HowDestroyEnum();
+
+    [SerializeField]
+    AudioSource DestroyedSoundPlayer;
+
+    [SerializeField]
+    AudioClip DestroyedSound;
 
     private void OnEnable()
     {
@@ -70,10 +88,50 @@ public class DestroyMeByBullets : MonoBehaviour
             healthbar.UpdateHealthBar(LifePoint);
     }
 
-    void DestroySelf() // destroy itself and depending objects
+    void Destroyed()
     {
-        Destroy(gameObject);      
+        SpawnedFX = Instantiate<GameObject>(FXPrefab, FXSpawnPoint.transform.position, FXSpawnPoint.transform.rotation);
+
+        Destroy(gameObject);
     }
 
+    void DestroySelf() // destroy itself and depending objects
+    {
+        if (HowDestroy == HowDestroyEnum.DestroyObject)
+        {
+            // destroy the object
+            Destroy(gameObject);
+
+        }
+        else if (HowDestroy == HowDestroyEnum.DisableComponent)
+        {
+            // disable the object
+            this.enabled = false;
+        }
+
+        InstantiateFXForDestruction();
+        PlayDestructionSound();    
+    }
+
+    void InstantiateFXForDestruction()
+    {
+        if (FXPrefab != null)
+        {
+            // Instantiate the particle system at the impact position
+            GameObject spawner = Instantiate<GameObject>(FXPrefab, FXSpawnPoint.transform.position,
+               FXSpawnPoint.transform.rotation);
+        }
+    }
+
+    void PlayDestructionSound()
+    {
+        if (DestroyedSoundPlayer != null)
+        {
+            DestroyedSoundPlayer.enabled = true;
+            DestroyedSoundPlayer.Stop();
+            DestroyedSoundPlayer.loop = false;
+            DestroyedSoundPlayer.PlayOneShot(DestroyedSound);
+        }
+    }
     #endregion Damages & death
 }

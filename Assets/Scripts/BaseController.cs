@@ -12,7 +12,7 @@ public class BaseController : MonoBehaviour
     [Header("Base Controller")]
     public bool GameStarted = false;
     
-    enum HowDestroyEnum { DestroyObject, DestroyComponent }
+    enum HowDestroyEnum { DestroyObject, DisableComponent }
     [SerializeField]
     private HowDestroyEnum HowDestroy = new HowDestroyEnum();
 
@@ -240,6 +240,9 @@ public class BaseController : MonoBehaviour
                     {
                         if (BulletSpawnersList[i].BulletSpawner != null)
                         {
+                            // for trap turrets
+                            if (BulletSpawnersList[i].BulletSpawner.GetComponentInParent<DestroyMeByBullets>() == false
+                                || (BulletSpawnersList[i].BulletSpawner.GetComponentInParent<DestroyMeByBullets>().enabled == true))
                             // prepare the bullet to be created
                             InstantiateBulletPrefab(BulletSpawnersList[i]);
                         }
@@ -398,24 +401,30 @@ public class BaseController : MonoBehaviour
     #region Damages & death
     void OnCollisionEnter(Collision collision) // object is collided by anther object, verify if the other is an ennemy bullet
     {
-        // verify if the collision is an entering ennemy bullet
-        if (collision.transform.GetComponent<BulletController>())
-        {
-            // Receive damages from the bullet
-            ReceiveDamages(collision.transform.GetComponent<BulletController>().GetDamages());
-        } 
-        // verify is it is an ammo box
-        else if (collision.transform.GetComponent<AmmoBoxManager>())
-        {
-            if (Ammo < MaxAmmo)
+        if (LifePoint > 0) {
+            // verify if the collision is an entering ennemy bullet
+            if (collision.transform.GetComponent<BulletController>())
             {
                 // Receive damages from the bullet
-                AddAmmos(collision.transform.GetComponent<AmmoBoxManager>().GetAmmos());
-                Destroy(collision.gameObject);
-
-                if (IsPlayer)
-                    uiManager.SetAmmosDisplay(Ammo);               
+                ReceiveDamages(collision.transform.GetComponent<BulletController>().GetDamages());
             }
+            // verify is it is an ammo box
+            else if (IsPlayer && collision.transform.GetComponent<AmmoBoxManager>())
+            {
+                if (Ammo < MaxAmmo)
+                {
+                    // Receive damages from the bullet
+                    AddAmmos(collision.transform.GetComponent<AmmoBoxManager>().GetAmmos());
+                    Destroy(collision.gameObject);
+
+                    if (IsPlayer)
+                        uiManager.SetAmmosDisplay(Ammo);
+                }
+            }
+        }
+        else
+        {
+            // resurrection
         }
     }
 
@@ -467,17 +476,15 @@ public class BaseController : MonoBehaviour
     void DestroySelf() // destroy itself and depending objects
     {
         if (HowDestroy == HowDestroyEnum.DestroyObject) {
-            // destroy the object regardless it is the player's tank or a turret
+            // destroy the object
             Destroy(CanonTurret);
             Destroy(gameObject);
     
         }
-        else if (HowDestroy == HowDestroyEnum.DestroyComponent)
+        else if (HowDestroy == HowDestroyEnum.DisableComponent)
         {
-            // destroy the object regardless it is the player's tank or a turret
-            this.enabled = false;
-          
-
+            // disable the object
+            this.enabled = false;       
         }
 
         InstantiateFXForDestruction();
