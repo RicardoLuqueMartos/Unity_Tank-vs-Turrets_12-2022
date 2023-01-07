@@ -59,6 +59,22 @@ public class TankController : BaseController
     }
     [SerializeField]
     private FXData fXs = new FXData();
+
+    [SerializeField]
+    ScrollMyTexture track1TextureScroller;
+    [SerializeField]
+    ScrollMyTexture track2TextureScroller;
+    [SerializeField]
+    float forwardScrollSpeed = 0;
+    [SerializeField]
+    float backwardScrollSpeed = 0;
+    [SerializeField]
+    float WheelsRotationSpeedMultiplier = 3;
+    [SerializeField]
+    List<Transform> WheelsLeftList = new List<Transform>();
+
+    [SerializeField]
+    List<Transform> WheelsRightList = new List<Transform>();
     #endregion Variables
 
     private void Start()
@@ -148,35 +164,134 @@ public class TankController : BaseController
         {
             transform.Translate(Vector3.forward * (Time.deltaTime * maxVelocity));
             state = StateEnum.MoveForward;
+
+            ScrollLeftWheels(forwardScrollSpeed);
+            ScrollTexturesForwardY();
         }
         else if (Input.GetAxis("Vertical") < 0 || Input.GetKey(KeyCode.S))
         {
             transform.Translate(Vector3.back * (Time.deltaTime * maxVelocity));
             state = StateEnum.MoveBackward;
+
+            ScrollLeftWheels(backwardScrollSpeed);
+            ScrollTexturesBackwardY();
         }
         else
         {
+            StopScrollTexturesY();
+
             state = StateEnum.Idle;
         }
     }
-
     void HandleTankRotation()
     {
-        if (Input.GetAxis("Horizontal") != 0)
+        if (Input.GetAxis("Horizontal") > 0)
         {
+
             // rotate Horizontally the body of the tank by getting the input value and multiplying it by the rotation speed
             transform.Rotate(0.0f, Input.GetAxis("Horizontal") * rotationSpeed, 0.0f, Space.World);
 
             if (state == StateEnum.Idle && (Input.GetAxis("Vertical") == 0 || Input.GetKey(KeyCode.None)))
+            {
                 state = StateEnum.RotateInPlace;
+                ScrollTexturesRotateRightY();
+            }
+        }
+        else if (Input.GetAxis("Horizontal") < 0)
+        {
+
+            // rotate Horizontally the body of the tank by getting the input value and multiplying it by the rotation speed
+            transform.Rotate(0.0f, Input.GetAxis("Horizontal") * rotationSpeed, 0.0f, Space.World);
+
+            if (state == StateEnum.Idle && (Input.GetAxis("Vertical") == 0 || Input.GetKey(KeyCode.None)))
+            {          
+                state = StateEnum.RotateInPlace;
+                ScrollTexturesRotateLeftY();
+            }
         }
         else if (Input.GetAxis("Vertical") == 0 || Input.GetKey(KeyCode.None) )
         {
             state = StateEnum.Idle;
+
+            StopScrollTexturesY();
         }
 
     }
 
+    #region Tracks Wheels Rotation
+    private void ScrollLeftWheels(float value)
+    {
+        for (int i = 0; i < WheelsLeftList.Count; i++)
+        {
+            WheelsLeftList[i].Rotate(value* WheelsRotationSpeedMultiplier, 0.0f, 0.0f, Space.Self);
+        }
+    }
+
+    private void ScrollRightWheels(float value)
+    {
+        for (int i = 0; i < WheelsRightList.Count; i++)
+        {
+            WheelsRightList[i].Rotate(value * WheelsRotationSpeedMultiplier, 0.0f, 0.0f, Space.Self);
+        }
+    }
+    #endregion Tracks Wheels Rotation
+
+    #region Tracks Texture Scrolling
+    private void ScrollTexturesForwardY()
+    {
+        if (track1TextureScroller != null)
+            track1TextureScroller.scrollSpeedY = forwardScrollSpeed;
+        if (track2TextureScroller != null)
+            track2TextureScroller.scrollSpeedY = forwardScrollSpeed;
+
+        ScrollLeftWheels(forwardScrollSpeed);
+        ScrollRightWheels(forwardScrollSpeed);
+    }
+
+    private void ScrollTexturesBackwardY()
+    {
+        if (track1TextureScroller != null)
+            track1TextureScroller.scrollSpeedY = backwardScrollSpeed;
+        if (track2TextureScroller != null)
+            track2TextureScroller.scrollSpeedY = backwardScrollSpeed;
+
+
+        ScrollLeftWheels(backwardScrollSpeed);
+        ScrollRightWheels(backwardScrollSpeed);
+    }
+      
+    private void StopScrollTexturesY()
+    {
+        if (track1TextureScroller != null)
+            track1TextureScroller.scrollSpeedY = 0;
+        if (track2TextureScroller != null)
+            track2TextureScroller.scrollSpeedY = 0;
+    }
+    
+    private void ScrollTexturesRotateLeftY()
+    {
+        if (track1TextureScroller != null)
+            track1TextureScroller.scrollSpeedY = backwardScrollSpeed;
+        if (track2TextureScroller != null)
+            track2TextureScroller.scrollSpeedY = forwardScrollSpeed;
+
+        ScrollLeftWheels(backwardScrollSpeed);
+        ScrollRightWheels(forwardScrollSpeed);
+    }
+   
+    private void ScrollTexturesRotateRightY()
+    {
+        if (track1TextureScroller != null)
+            track1TextureScroller.scrollSpeedY = forwardScrollSpeed;
+        if (track2TextureScroller != null)
+            track2TextureScroller.scrollSpeedY = backwardScrollSpeed;
+
+        ScrollLeftWheels(forwardScrollSpeed);
+        ScrollRightWheels(backwardScrollSpeed);
+    }
+    #endregion Tracks Texture Scrolling
+
+    #region Turret & Canon Movs
     public GameObject GetTurretObj()
     {
         return CanonTurret;
@@ -219,8 +334,9 @@ public class TankController : BaseController
         fXs.soundFXs.TurretRotateSoundPlayer.Stop();
         fXs.soundFXs.TurretRotateSoundPlayer.clip = null;
     }
+    #endregion Turret & Canon Movs
 
-    #endregion Movement & rotation
+#endregion Movement & rotation
 
     #region Firing
     void HandleFire()
