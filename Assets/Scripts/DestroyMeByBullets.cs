@@ -55,7 +55,8 @@ public class DestroyMeByBullets : MonoBehaviour
     void OnCollisionEnter(Collision collision) // object is collided by anther object, verify if the other is an ennemy bullet
     {
         // verify if the collision is an entering ennemy bullet
-        if (collision.transform.GetComponent<BulletController>())
+        if (collision.transform.GetComponent<BulletController>()
+            && this.enabled == true)
         {
             // Receive damages from the bullet
             ReceiveDamages(collision.transform.GetComponent<BulletController>().GetDamages());
@@ -86,13 +87,6 @@ public class DestroyMeByBullets : MonoBehaviour
 
         if (healthbar != null)
             healthbar.UpdateHealthBar(LifePoint);
-    }
-
-    void Destroyed()
-    {
-        SpawnedFX = Instantiate<GameObject>(FXPrefab, FXSpawnPoint.transform.position, FXSpawnPoint.transform.rotation);
-
-        Destroy(gameObject);
     }
 
     void DestroySelf() // destroy itself and depending objects

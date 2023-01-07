@@ -11,8 +11,12 @@ public class BulletController : MonoBehaviour
     enum MoveSystemEnum { ByForce, ByTranslate}
     [SerializeField]
     private MoveSystemEnum moveSystem = new MoveSystemEnum();
+    public enum FiredByEnum { Player, Enemy }
+    [SerializeField]
+    public FiredByEnum FiredBy = new FiredByEnum();
 
-
+    [SerializeField]
+    bool NoDestroyOnEnnemyCollision = false;
 
     [SerializeField]
     private bool explodeByItself = false;
@@ -93,8 +97,16 @@ public class BulletController : MonoBehaviour
         {
             _collision = collision;
 
-            // destroy the bullet after it to collide with anything       
-            DestroySelf();
+            if ((collision.transform.GetComponent<TurretController>() == null
+                || (collision.transform.GetComponent<TurretController>() && NoDestroyOnEnnemyCollision == false))
+                || (collision.transform.GetComponent<DestroyMeByBullets>() == null
+                || (collision.transform.GetComponent<DestroyMeByBullets>() && NoDestroyOnEnnemyCollision == false))
+                || (collision.transform.GetComponent<TankController>() == null
+                || (collision.transform.GetComponent<TankController>() && NoDestroyOnEnnemyCollision == false)))
+            {
+                // destroy the bullet after it to collide with anything     
+                DestroySelf();
+            }            
         }
     }
 

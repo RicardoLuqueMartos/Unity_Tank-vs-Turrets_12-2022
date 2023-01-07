@@ -30,9 +30,7 @@ public class TurretController : BaseController
     float viewRadius = 10f;
 
     [SerializeField]
-    float viewAngle = 10f;
-
-    
+    float viewAngle = 10f;    
 
     #endregion Variables
 
@@ -77,7 +75,8 @@ public class TurretController : BaseController
     void AimPlayer()
     {
         // calculate relative position between target position and turret position
-        Vector3 relativePos = target.transform.position - CanonTurret.transform.position;
+    //    Vector3 relativePos = target.transform.position - CanonTurret.transform.position;
+        Vector3 relativePos = target.transform.position - BulletSpawner.BulletSpawner.transform.position;
 
         // transform to rotation the look direction of relativePosition
         Quaternion toRotation = Quaternion.LookRotation(relativePos);
@@ -87,6 +86,14 @@ public class TurretController : BaseController
 
         if (GetDistanceToPlayer() <= TurretFireRange) // fire a projectile if the target is in range
             HandleFire();
+                 
+        else if (Firing == true && FiringParticleSystem != null)
+        {
+
+            Firing = false;
+            FiringParticleSystem.Stop(true);
+        }
+        
     }
 
     public void SetTarget(TankController tankController) // receive the target detected by TurretDetectorTrigger
@@ -97,7 +104,6 @@ public class TurretController : BaseController
     float GetDistanceToPlayer() // Return the calculated distance between the Turret and the target
     {
         float distance = Vector3.Distance(transform.position, target.transform.position);
-
         return distance;
     }
 

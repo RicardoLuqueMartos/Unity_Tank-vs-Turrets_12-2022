@@ -27,7 +27,6 @@ public class FXSpawner : MonoBehaviour
     public class FXData
     {
         public GameObject ParticlesPrefab;
-
         public List<AudioClip> SoundsList = new List<AudioClip>();
 
     }
