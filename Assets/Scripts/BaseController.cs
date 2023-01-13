@@ -19,7 +19,7 @@ public class BaseController : MonoBehaviour
     [Header("Player Only")]
 
     [SerializeField]
-    int TurretAmount = 10;
+    protected int TurretAmount = 10;
 
     [SerializeField]
     protected int DestroyedTurrets = 0;
@@ -144,23 +144,35 @@ public class BaseController : MonoBehaviour
     [SerializeField]
     private AudioSource DestroyedSoundPlayer;
 
-   
+    public delegate void MessageEvent();
+    public static event MessageEvent TankDestroyed;
+    public static event MessageEvent TurretDestroyed;
     #endregion Variables
 
     #region Inits
+    private void Start()
+    {
+        uiManager = FindObjectOfType<UIManager>();
+        tankController = FindObjectOfType<TankController>();
+    }
+
     private void OnEnable()
     {
         tankController = FindObjectOfType<TankController>();
         uiManager = FindObjectOfType<UIManager>();
         DetectTurretsAmount();
+        InitMaxValuesDisplays();
 
         if (healthbar != null)
             healthbar.maxHealthPoints = MaxLifePoint;
+
+        
     }
 
     public void StartGame()
     {
-        InitMaxValuesDisplays();
+        OnEnable();
+     //   InitMaxValuesDisplays();
         uiManager.CloseStartMenu();
         GameStarted = true;
         tankController.StartEngine();        
@@ -186,15 +198,6 @@ public class BaseController : MonoBehaviour
         TurretAmount = turretsList.Count;
     }
     
-    void VerifyDestroyedTurretsAmount() // verify if all ennemy turrets are destroyed
-    {
-        // verify if all turrets are destroyed
-        if (tankController.DestroyedTurrets == TurretAmount)
-        {
-            // open win menu if all ennemies are destroyed
-            uiManager.OpenWinMenu();
-        }
-    }
     #endregion About Enemy Turrets
 
     #region Updates
@@ -496,15 +499,8 @@ public class BaseController : MonoBehaviour
                     && tankController.transform != null
                     && tankController.transform != transform)
                 {
-                    // add one destroyed turret to counter
-                    tankController.DestroyedTurrets = tankController.DestroyedTurrets + 1;
-
-                    // update UI about destroyed turrets
-                    if (!IsPlayer)
-                        uiManager.SetDestroyedTurretsDisplay(tankController.DestroyedTurrets);
-
-                    // verify if all turrets are destroyed
-                    VerifyDestroyedTurretsAmount();
+                    TurretDestroyed?.Invoke();
+                   
                 }
                 DestroySelf();
             }
@@ -545,7 +541,7 @@ public class BaseController : MonoBehaviour
         // Open the Win Menu if the Player's tank is destroyed 
         if (IsPlayer)
         {
-            uiManager.OpenFailMenu();
+            TankDestroyed?.Invoke();
             tankController.GameStarted = false;
         }
     }
@@ -584,6 +580,8 @@ public class BaseController : MonoBehaviour
     #region UI
     void InitMaxValuesDisplays() // Assign the max values to the UI at game init
     {
+        
+
         // Set initially all the UI about Life points, ammos and turrets
         uiManager.SetLifePointsDisplay(LifePoint);
         uiManager.SetMaxLifePointsDisplay(MaxLifePoint);

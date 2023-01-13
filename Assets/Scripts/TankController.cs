@@ -6,15 +6,13 @@ using UnityEngine;
 public class TankController : BaseController
 {
     #region Variables
-
     [Header("Tank Controller")]    
-
     [SerializeField]
     float maxVelocity = 1.0f;
-
+    
     [SerializeField]
     float velocity = 1.0f;
-
+    
     [SerializeField]
     float rotationSpeed = 1.0f;       
 
@@ -75,13 +73,21 @@ public class TankController : BaseController
 
     [SerializeField]
     List<Transform> WheelsRightList = new List<Transform>();
+
+    public delegate void MessageEvent();
+    public static event MessageEvent WinGame;
     #endregion Variables
 
     private void Start()
     {
         _rigidBody = GetComponent<Rigidbody>();
         cameraObject = FindObjectOfType<Camera>().gameObject;
-    }    
+    }
+
+    private void OnEnable()
+    {
+        BaseController.TurretDestroyed += EnemyTurretDestroyed;
+    }
 
     public void StartEngine()
     {
@@ -96,8 +102,8 @@ public class TankController : BaseController
         fXs.soundFXs.IdleSoundPlayer.loop = true;
         fXs.soundFXs.MoveSoundPlayer.clip = fXs.soundFXs.IdleSound;
         fXs.soundFXs.MoveSoundPlayer.Play();
-    }
-        void EngineStarted()
+    }       
+    void EngineStarted()
     {
         state = StateEnum.Idle;
         fXs.soundFXs.MoveSoundPlayer.loop = true;
@@ -346,28 +352,46 @@ public class TankController : BaseController
             Fire();
         }        
     }
-    
+
+    private void EnemyTurretDestroyed()
+    {
+        // add one destroyed turret to counter
+        DestroyedTurrets = DestroyedTurrets + 1;
+        uiManager.SetDestroyedTurretsDisplay(tankController.DestroyedTurrets);
+
+        // verify if all turrets are destroyed
+        VerifyDestroyedTurretsAmount();
+    }
+
+
+    void VerifyDestroyedTurretsAmount() // verify if all ennemy turrets are destroyed
+    {
+        // verify if all turrets are destroyed
+        if (DestroyedTurrets == TurretAmount)
+            WinGame?.Invoke();            
+    }
     #endregion Firing
-    
+
     #region Heal
     private void OnTriggerEnter(Collider other)
     {
         if (other.transform.tag == "HealPlatform")
         {
-            StartHeal();
+            StartHeal(other.transform);
         }
     }
     private void OnTriggerExit(Collider other)
     {
         if (other.transform.tag == "HealPlatform")
         {
-            EndHeal();
+            EndHeal(other.transform);
         }
     }
 
-    void StartHeal()
+    void StartHeal(Transform healerTransform)
     {
-        InvokeRepeating("Healing", 0, HealingRate);
+        healerTransform.GetComponent<AudioSource>().Play();
+        InvokeRepeating("Healing", 0, HealingRate);       
     }
 
     void Healing()
@@ -389,8 +413,9 @@ public class TankController : BaseController
             uiManager.SetLifePointsDisplay(LifePoint);
     }
 
-    void EndHeal()
+    void EndHeal(Transform healerTransform)
     {
+        healerTransform.GetComponent<AudioSource>().Stop();
         CancelInvoke("Healing");
     }
     #endregion Heal

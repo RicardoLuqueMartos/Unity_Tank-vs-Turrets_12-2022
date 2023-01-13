@@ -44,6 +44,19 @@ public class UIManager : MonoBehaviour
 
     #endregion Variables
 
+    private void OnEnable()
+    {
+        BaseController.TankDestroyed += OpenFailMenu;
+        TankController.WinGame += OpenWinMenu;
+    }
+
+    private void OnDestroy()
+    {
+        BaseController.TankDestroyed -= OpenFailMenu;
+        TankController.WinGame -= OpenWinMenu;
+
+    }
+
     #region Max Values Init
     public void SetMaxLifePointsDisplay(int value)
     {

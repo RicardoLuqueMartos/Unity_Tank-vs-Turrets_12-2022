@@ -16,7 +16,7 @@ public class TurretController : BaseController
     [SerializeField]
     float rotationSpeed = 5;
     float rotateValue;
-
+    
     [SerializeField]
     bool playerDetected = false;
 
