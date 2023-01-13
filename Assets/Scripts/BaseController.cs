@@ -164,9 +164,7 @@ public class BaseController : MonoBehaviour
         InitMaxValuesDisplays();
 
         if (healthbar != null)
-            healthbar.maxHealthPoints = MaxLifePoint;
-
-        
+            healthbar.maxHealthPoints = MaxLifePoint;        
     }
 
     public void StartGame()
@@ -579,9 +577,7 @@ public class BaseController : MonoBehaviour
 
     #region UI
     void InitMaxValuesDisplays() // Assign the max values to the UI at game init
-    {
-        
-
+    {        
         // Set initially all the UI about Life points, ammos and turrets
         uiManager.SetLifePointsDisplay(LifePoint);
         uiManager.SetMaxLifePointsDisplay(MaxLifePoint);
