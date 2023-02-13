@@ -2,6 +2,7 @@
 A solo player tank 3rd person combat
 
 Cinematic : https://youtu.be/3XGxXLthE90
+Portfolio : https://ricardoluquemartos.artstation.com/projects/BXoabA
 
 Game Content :
 One tank for the player
@@ -15,6 +16,7 @@ VF :
 Un jeu de Tank en solo à la 1ere personne
 
 Cinematique: https://youtu.be/3XGxXLthE90
+Portfolio : https://ricardoluquemartos.artstation.com/projects/BXoabA
 
 Contenu du jeu :
 Un tank pour le joueur.
